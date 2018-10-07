@@ -1,0 +1,14 @@
+Flask StaticSite precisa fazer as seguintes atividades
+
+Para cada arquivo da pasta especificada, carregar o Sitemap com a classe Page
+- Páginas com entrada de cabeçalho 'published=false' ou entrada 'date' maior que data atual são ignoradas
+-- Páginas com entrada 'date' maior que data atual aparecem no modo debug.
+Carregar classe Page com os cabeçalhos YAML dos arquivos de Página
+- Arquivos sem cabeçalho YAML são ignorados
+- Arquivos sem as entradas de cabeçalho mínimas (slug e date) no formato devido são ignorados
+-- Entrada 'slug' é a chave primária das páginas, e por ela as páginas são carregadas do disco
+-- Entrada 'date' é importante para a organização das páginas
+Caso exista entrada 'tags', adicionar o slug da página para cada tag listada em tags
+Caso exista a entrada 'category', adicionar o slug da página na categoria listada
+Todas as entradas de cabeçalho são adicionadas à propriedade 'meta'
+O conteúdo das páginas só é carregado quando as funções `get` ou `get_or_404` são chamadas
