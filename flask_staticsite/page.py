@@ -16,6 +16,8 @@ def _preload_header(file, encoding, shield='---'):
                     else:
                         header['filepos'] = raw.tell()
                         break
+            if 'filepos' not in header:
+                raise ValueError('Malformed header')
             header['headers'] = yaml.safe_load(s)
     except IOError:
         print('Could not read file {0}'.format(file))
