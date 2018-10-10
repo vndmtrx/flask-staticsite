@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import yaml, os
 
 def _preload_header(file, encoding, shield='---'):

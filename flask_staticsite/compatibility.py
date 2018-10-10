@@ -1,5 +1,7 @@
-import sys
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
+import sys
 
 IS_PY3 = sys.version_info[0] == 3
 string_types = (str, ) if IS_PY3 else (basestring, )  # noqa
