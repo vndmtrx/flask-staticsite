@@ -41,8 +41,8 @@ class Page(object):
     deliver them.
     """
     
-    def __new__(cls, path, encoding='utf-8', requires=()):
-        yml = _preload_header(path, encoding)
+    def __new__(cls, filename, encoding='utf-8', requires=()):
+        yml = _preload_header(filename, encoding)
         if len(yml) == 2:
             obj = super(Page, cls).__new__(cls)
             obj._meta = yml['headers']
@@ -50,19 +50,19 @@ class Page(object):
             req = ('slug',) + requires
             for item in req:
                 if item not in obj._meta:
-                    raise PageException('Required header is not present in file "{0}": "{1}"'.format(path, item))
+                    raise PageException('Required header is not present in file "{0}": "{1}"'.format(filename, item))
             return obj
         else:
-            raise PageException('File "{0}" has no headers'.format(path))
+            raise PageException('File "{0}" has no headers'.format(filename))
     
     
-    def __init__(self, path, encoding='utf-8', requires=()):
-        self.path = path
+    def __init__(self, filename, encoding='utf-8', requires=()):
+        self.filename = filename
         self.encoding = encoding
-        self.mtime = os.path.getmtime(path)
+        self.mtime = os.path.getmtime(filename)
     
     def __repr__(self):
-        return '<Page "{0}">'.format(self.path)
+        return '<Page "{0}">'.format(self.filename)
     
     @property
     def meta(self):
@@ -73,9 +73,9 @@ class Page(object):
         try:
             return self._content
         except AttributeError:
-            if self.mtime != os.path.getmtime(self.path):
-                raise PageException('File "{0}" changed since instance creation'.format(self.path))
-            with open(self.path) as raw:
+            if self.mtime != os.path.getmtime(self.filename):
+                raise PageException('File "{0}" changed since instance creation'.format(self.filename))
+            with open(self.filename) as raw:
                 raw.seek(self._filepos, 0)
                 self._content = raw.read().strip()
             return self._content
