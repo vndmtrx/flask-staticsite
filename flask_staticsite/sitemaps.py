@@ -18,7 +18,7 @@ class Paginator(object):
         return [self._list[i:i + self._offset] for i in range(0, len(self._list), self._offset)]
     
     def __getitem__(self, idx):
-        return self._paginated_list()[idx]
+        return {'index': idx, 'item': self._paginated_list()[idx]}
     
     def __len__(self):
         return len(self._paginated_list())
