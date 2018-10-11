@@ -22,7 +22,9 @@ class Paginator(object):
     
     def __len__(self):
         return len(self._paginated_list())
-
+    
+    def __iter__(self):
+        return iter(self._paginated_list())
 
 class Sitemaps(object):
     """Class responsible to get all posts from file.
