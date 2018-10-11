@@ -5,6 +5,25 @@ import os
 from . import compatibility
 from .page import Page
 
+class Paginator(object):
+    """
+    Class responsible to paginate post lists to use in indexes pages.
+    """
+    
+    def __init__(self, list, offset):
+        self._list = list
+        self._offset = offset
+    
+    def _paginated_list(self):
+        return [self._list[i:i + self._offset] for i in range(0, len(self._list), self._offset)]
+    
+    def __getitem__(self, idx):
+        return self._paginated_list()[idx]
+    
+    def __len__(self):
+        return len(self._paginated_list())
+
+
 class Sitemaps(object):
     """Class responsible to get all posts from file.
     
