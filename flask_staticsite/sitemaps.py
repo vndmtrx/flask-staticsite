@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from . import compatibility
 from .page import Page
 
 class Sitemaps(object):
@@ -32,3 +33,14 @@ class Sitemaps(object):
                         
                         full_name = os.path.join(cur_path, name)
                         yield full_name
+    
+    @property
+    def tags(self):
+        pass
+    
+    @property
+    def categories(self):
+        pass
+    
+    def __iter__(self):
+        return compatibility.itervalues(self.pages)
