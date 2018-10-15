@@ -2,10 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import os
+import logging
 from . import compatibility
 from .page import Page
 from .utils.exceptions import SitemapException
 from .utils.key_mappers import SlugMapper
+
+logger = logging.getLogger(__name__)
 
 class Sitemap(object):
     """Class responsible to get all posts from file.

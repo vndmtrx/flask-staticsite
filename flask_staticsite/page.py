@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import yaml, os
-
+import os
+import yaml
+import logging
 from . import compatibility
 from .utils.exceptions import PageException
+
+logger = logging.getLogger(__name__)
 
 def _preload_header(file, encoding, shield='---'):
     header = {}
