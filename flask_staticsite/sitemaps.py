@@ -4,29 +4,9 @@
 import os
 from . import compatibility
 from .page import Page
+from .utils.exceptions import SitemapException
 
-class Paginator(object):
-    """
-    Class responsible to paginate post lists to use in indexes pages.
-    """
-    
-    def __init__(self, list, offset):
-        self._list = list
-        self._offset = offset
-    
-    def _paginated_list(self):
-        return [self._list[i:i + self._offset] for i in range(0, len(self._list), self._offset)]
-    
-    def __getitem__(self, idx):
-        return {'index': idx, 'item': self._paginated_list()[idx]}
-    
-    def __len__(self):
-        return len(self._paginated_list())
-    
-    def __iter__(self):
-        return iter(self._paginated_list())
-
-class Sitemaps(object):
+class Sitemap(object):
     """Class responsible to get all posts from file.
     
     The main purpose is to walk the filesystem gathering all files that can be
@@ -34,34 +14,68 @@ class Sitemaps(object):
     headers, create lists of posts for any of them.
     """
     
-    def __init__(self, path, extensions):
+    def __init__(self, path, extensions=(), encoding='utf-8'):
         self.path = path
         self.extensions = extensions
+        self.encoding = encoding
 
     @property
     def pages(self):
         try:
             return self._pages
         except AttributeError:
+            pagedict = {}
             def _walker():
                 for cur_path, _, filenames in os.walk(self.path):
-                    rel_path = cur_path.replace(self.path, '').lstrip(os.sep)
-                    path_prefix = tuple(rel_path.split(os.sep)) if rel_path else ()
-                    
                     for n in filenames:
-                        if not n.endswith(self.extension):
+                        if self.extensions and not n.endswith(self.extensions):
                             continue
-                        
-                        full_name = os.path.join(cur_path, name)
+                        full_name = os.path.join(cur_path, n)
                         yield full_name
+            for filename in _walker():
+                try:
+                    pg = Page(filename, encoding=self.encoding, requires=('slug',))
+                    if pg.meta['slug'] not in pagedict:
+                        pagedict[pg.meta['slug']] = pg
+                    else:
+                        raise SitemapException('Slug "{0}" exists in the Sitemap.'.format(pg.meta['slug']))
+                except Exception as e:
+                    print('An exception occurred while processing the file "{0}": {1}. Ignoring file.'.format(filename, str(e)))
+                    continue
+            self._pages = pagedict
+            return self._pages
     
-    @property
-    def tags(self):
-        pass
+    def pages_by_header(self, header, item=None):
+        l = {kw: p for kw, p in self.pages.items() if header in p.meta}
+        if item == None:
+            return l
+        else:
+            for kw, p in l.items():
+                if isinstance(p.meta[header], (list, dict, tuple, set)):
+                    if item not in p.meta[header]:
+                        continue
+                elif item != p.meta[header]:
+                    continue
+                yield kw, p
+            #return {kw: p for kw, p in l.items() if item == p.meta[header] or (item in p.meta[header] and not isinstance(p.meta[header], str))}
     
-    @property
-    def categories(self):
-        pass
+    def header_values(self, header):
+        l = {kw: p for kw, p in self.pages.items() if header in p.meta}
+        s = set()
+        for p in l.values():
+            if isinstance(p.meta[header], (list, dict, tuple, set)):
+                for item in p.meta[header]:
+                    if item in s:
+                        continue
+                    else:
+                        s.add(item)
+                        yield item
+            else:
+                if p.meta[header] in s:
+                    continue
+                else:
+                    s.add(p.meta[header])
+                    yield p.meta[header]
     
     def __iter__(self):
         return compatibility.itervalues(self.pages)
