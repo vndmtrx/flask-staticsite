@@ -5,6 +5,7 @@ import os
 from . import compatibility
 from .page import Page
 from .utils.exceptions import SitemapException
+from .utils.key_mappers import SlugMapper
 
 class Sitemap(object):
     """Class responsible to get all posts from file.
@@ -14,10 +15,11 @@ class Sitemap(object):
     headers, create lists of posts for any of them.
     """
     
-    def __init__(self, path, extensions=(), encoding='utf-8'):
+    def __init__(self, path, extensions=(), encoding='utf-8', key_mapper=SlugMapper()):
         self.path = path
         self.extensions = extensions
         self.encoding = encoding
+        self._key_mapper = key_mapper
 
     @property
     def pages(self):
@@ -34,11 +36,11 @@ class Sitemap(object):
                         yield full_name
             for filename in _walker():
                 try:
-                    pg = Page(filename, encoding=self.encoding, requires=('slug',))
-                    if pg.meta['slug'] not in pagedict:
-                        pagedict[pg.meta['slug']] = pg
+                    pg = Page(filename, encoding=self.encoding, requires=self._key_mapper.requires)
+                    if self.key_for(pg) not in pagedict:
+                        pagedict[self.key_for(pg)] = pg
                     else:
-                        raise SitemapException('Slug "{0}" exists in the Sitemap.'.format(pg.meta['slug']))
+                        raise SitemapException('Key "{0}" exists in the Sitemap.'.format(self.key_for(pg)))
                 except Exception as e:
                     print('An exception occurred while processing the file "{0}": {1}. Ignoring file.'.format(filename, str(e)))
                     continue
@@ -57,7 +59,6 @@ class Sitemap(object):
                 elif item != p.meta[header]:
                     continue
                 yield kw, p
-            #return {kw: p for kw, p in l.items() if item == p.meta[header] or (item in p.meta[header] and not isinstance(p.meta[header], str))}
     
     def header_values(self, header):
         l = {kw: p for kw, p in self.pages.items() if header in p.meta}
@@ -76,6 +77,12 @@ class Sitemap(object):
                 else:
                     s.add(p.meta[header])
                     yield p.meta[header]
+    
+    def key_for(self, page):
+        return self._key_mapper.get_key(page)
+    
+    def reload(self):
+        del self._pages
     
     def __iter__(self):
         return compatibility.itervalues(self.pages)
