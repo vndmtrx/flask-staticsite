@@ -4,12 +4,7 @@
 import yaml, os
 
 from . import compatibility
-
-class PageException(Exception):
-    """
-    Exception crafted to be raised by Page Class and needs to be catched
-    elsewhere.
-    """
+from .utils.exceptions import PageException
 
 def _preload_header(file, encoding, shield='---'):
     header = {}
