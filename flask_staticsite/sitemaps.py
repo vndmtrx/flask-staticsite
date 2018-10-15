@@ -10,6 +10,12 @@ from .utils.key_mappers import SlugMapper
 
 logger = logging.getLogger(__name__)
 
+logger.setLevel(logging.DEBUG)
+hdl = logging.StreamHandler()
+fmt = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+hdl.setFormatter(fmt)
+logger.addHandler(hdl)
+
 class Sitemap(object):
     """Class responsible to get all posts from file.
     
@@ -29,26 +35,28 @@ class Sitemap(object):
         try:
             return self._pages
         except AttributeError:
-            pagedict = {}
-            def _walker():
-                for cur_path, _, filenames in os.walk(self.path):
-                    for n in filenames:
-                        if self.extensions and not n.endswith(self.extensions):
-                            continue
-                        full_name = os.path.join(cur_path, n)
-                        yield full_name
-            for filename in _walker():
-                try:
-                    pg = Page(filename, encoding=self.encoding, requires=self._key_mapper.requires)
-                    if self.key_for(pg) not in pagedict:
-                        pagedict[self.key_for(pg)] = pg
-                    else:
-                        raise SitemapException('Key "{0}" exists in the Sitemap.'.format(self.key_for(pg)))
-                except Exception as e:
-                    print('An exception occurred while processing the file "{0}": {1}. Ignoring file.'.format(filename, str(e)))
-                    continue
-            self._pages = pagedict
-            return self._pages
+            pass
+        pagedict = {}
+        def _walker():
+            for cur_path, _, filenames in os.walk(self.path):
+                for n in filenames:
+                    if self.extensions and not n.endswith(self.extensions):
+                        continue
+                    full_name = os.path.join(cur_path, n)
+                    yield full_name
+        for filename in _walker():
+            try:
+                pg = Page(filename, encoding=self.encoding, requires=self._key_mapper.requires)
+                if self.key_for(pg) not in pagedict:
+                    pagedict[self.key_for(pg)] = pg
+                else:
+                    raise SitemapException('Key "{0}" exists in the Sitemap.'.format(self.key_for(pg)))
+            except Exception as e:
+                logger.info('An exception occurred while processing the file: {0}. Ignoring file.'.format(filename, str(e)))
+                logger.debug(e, exc_info=True)
+                continue
+        self._pages = pagedict
+        return self._pages
     
     def pages_by_header(self, header, item=None):
         l = {kw: p for kw, p in self.pages.items() if header in p.meta}
