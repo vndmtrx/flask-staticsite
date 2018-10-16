@@ -20,6 +20,14 @@ class FilenameMapper(object):
         return page.filename
 
 
+class CategorySlugMapper(object):
+    def __init__(self):
+        self.requires = ('slug', 'category')
+    
+    def get_key(self, page):
+        return '{0}/{1}'.format(page.meta['category'], page.meta['slug'])
+
+
 class DateSlugMapper(object):
     def __init__(self, ptime='%Y-%m-%d %H:%M %z', ftime='%Y/%m'):
         self.requires = ('slug', 'date')
