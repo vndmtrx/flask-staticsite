@@ -29,7 +29,16 @@ class Sitemap(object):
         self.extensions = extensions
         self.encoding = encoding
         self._key_mapper = key_mapper
-
+    
+    @property
+    def key_mapper(self):
+        return self._key_mapper
+    
+    @key_mapper.setter
+    def key_mapper(self, value):
+        self._key_mapper = value
+        self.reload()
+    
     @property
     def pages(self):
         try:
@@ -46,11 +55,11 @@ class Sitemap(object):
                     yield full_name
         for filename in _walker():
             try:
-                pg = Page(filename, encoding=self.encoding, requires=self._key_mapper.requires)
-                if self.key_for(pg) not in pagedict:
-                    pagedict[self.key_for(pg)] = pg
+                pg = Page(filename, encoding=self.encoding, key_mapper=self._key_mapper)
+                if pg.key not in pagedict:
+                    pagedict[pg.key] = pg
                 else:
-                    raise SitemapException('Key "{0}" exists in the Sitemap.'.format(self.key_for(pg)))
+                    raise SitemapException('Key "{0}" exists in the Sitemap.'.format(pg.key))
             except Exception as e:
                 logger.info('An exception occurred while processing the file: {0}. Ignoring file.'.format(filename, str(e)))
                 logger.debug(e, exc_info=True)
@@ -88,9 +97,7 @@ class Sitemap(object):
                 else:
                     s.add(p.meta[header])
                     yield p.meta[header]
-    
-    def key_for(self, page):
-        return self._key_mapper.get_key(page)
+
     
     def reload(self):
         del self._pages

@@ -6,6 +6,7 @@ import yaml
 import logging
 from . import compatibility
 from .utils.exceptions import PageException
+from .utils.key_mappers import SlugMapper
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,7 @@ class Page(object):
     deliver them.
     """
     
-    def __new__(cls, filename, encoding='utf-8', requires=()):
+    def __new__(cls, filename, encoding='utf-8', key_mapper=SlugMapper()):
         yml = _preload_header(filename, encoding)
         #if 'headers' in yml and 'filepos' in yml:
         #if all(x in yml for x in ('headers','filepos')):
@@ -45,7 +46,7 @@ class Page(object):
             obj = super(Page, cls).__new__(cls)
             obj._meta = yml['headers']
             obj._filepos = yml['filepos']
-            for item in requires:
+            for item in key_mapper.requires:
                 if item not in obj._meta:
                     raise PageException('Required header is not present in file "{0}": "{1}"'.format(filename, item))
             return obj
@@ -53,13 +54,18 @@ class Page(object):
             raise PageException('No headers found in file: {0}'.format(filename))
     
     
-    def __init__(self, filename, encoding='utf-8', requires=()):
+    def __init__(self, filename, encoding='utf-8', key_mapper=SlugMapper()):
         self.filename = filename
         self.encoding = encoding
+        self.key_mapper=key_mapper
         self.mtime = os.path.getmtime(filename)
     
     def __repr__(self):
         return '<Page "{0}">'.format(self.filename)
+    
+    @property
+    def key(self):
+        return self.key_mapper.get_key(self)
     
     @property
     def meta(self):
