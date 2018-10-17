@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from ..page import Page
 
 class SlugMapper(object):
     def __init__(self):
