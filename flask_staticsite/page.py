@@ -54,7 +54,7 @@ class Page(object):
             raise PageException('No headers found in file: {0}'.format(filename))
     
     
-    def __init__(self, filename, encoding='utf-8', key_mapper=SlugMapper()):
+    def __init__(self, filename, encoding, key_mapper):
         self.filename = filename
         self.encoding = encoding
         self.key_mapper=key_mapper

@@ -6,7 +6,6 @@ import logging
 from . import compatibility
 from .page import Page
 from .utils.exceptions import SitemapException
-from .utils.key_mappers import SlugMapper
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ class Sitemap(object):
     headers, create lists of posts for any of them.
     """
     
-    def __init__(self, path, extensions=(), encoding='utf-8', key_mapper=SlugMapper()):
+    def __init__(self, path, extensions, encoding, key_mapper):
         self.path = path
         self.extensions = extensions
         self.encoding = encoding
@@ -100,7 +99,10 @@ class Sitemap(object):
 
     
     def reload(self):
-        del self._pages
+        try:
+            del self._pages
+        except NameError:
+            pass
     
     def __iter__(self):
         return compatibility.itervalues(self.pages)
