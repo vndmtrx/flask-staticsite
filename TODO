@@ -25,4 +25,5 @@ com menos itens (preferencialmente usando itertools)
 
 FALTA Criar marcador de cabeçalho de página, de forma a poder extrair parte do conteúdo da postagem para exibição em páginas e índice
 
-Para um objeto StaticSite, permitir a criação de várias instâncias de Sitemap, com configurações diferentes.
+REMOVIDO Para um objeto StaticSite, permitir a criação de várias instâncias de Sitemap, com configurações diferentes.
+O objeto StaticSite será responsável por fazer interligação com o Flask, ao ponto que o objeto Sitemap será responsável únicamente por fazer a indexação dos arquivos do disco através da classe Page.
