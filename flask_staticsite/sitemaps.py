@@ -7,7 +7,6 @@ import six
 import logging
 from .page import Page
 from .utils.exceptions import SitemapException
-from .utils.key_mappers import SlugMapper
 
 logger = logging.getLogger(__name__)
 
@@ -25,20 +24,12 @@ class Sitemap(object):
     headers, create lists of posts for any of them.
     """
     
-    def __init__(self, path, extensions, encoding):
+    def __init__(self, path, extensions, encoding='utf-8', keymap_strategy='{filename}', requires=[]):
         self.path = path
         self.extensions = extensions
         self.encoding = encoding
-        self._key_mapper = SlugMapper()
-    
-    @property
-    def key_mapper(self):
-        return self._key_mapper
-    
-    @key_mapper.setter
-    def key_mapper(self, value):
-        self._key_mapper = value
-        self.reload()
+        self._requires = requires
+        self._keymap_strategy = keymap_strategy
     
     @property
     def pages(self):
@@ -56,7 +47,7 @@ class Sitemap(object):
                     yield full_name
         for filename in _walker():
             try:
-                pg = Page(filename, encoding=self.encoding, key_mapper=self._key_mapper)
+                pg = Page(filename, self.encoding, self._keymap_strategy, self._requires)
                 if pg.key not in pagedict:
                     pagedict[pg.key] = pg
                 else:
@@ -106,3 +97,21 @@ class Sitemap(object):
     
     def __iter__(self):
         return six.itervalues(self.pages)
+
+    @property
+    def requires(self):
+        return self._requires
+    
+    @requires.setter
+    def requires(self, value):
+        self._requires = value
+        self.reload()
+    
+    @property
+    def keymap_strategy(self):
+        return self._keymap_strategy
+    
+    @keymap_strategy.setter
+    def keymap_strategy(self, value):
+        self._keymap_strategy = value
+        self.reload()

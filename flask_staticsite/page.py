@@ -8,7 +8,6 @@ import yaml
 import logging
 from io import open
 from .utils.exceptions import PageException
-from .utils.key_mappers import SlugMapper
 
 logger = logging.getLogger(__name__)
 
@@ -40,15 +39,16 @@ class Page(object):
     deliver them.
     """
     
-    def __new__(cls, filename, encoding='utf-8', key_mapper=SlugMapper()):
+    def __new__(cls, filename, encoding='utf-8', keymap_strategy='{filename}', requires=[]):
         yml = _preload_header(filename, encoding)
         #if 'headers' in yml and 'filepos' in yml:
         #if all(x in yml for x in ('headers','filepos')):
         if {'headers', 'filepos'}.issubset(yml):
             obj = super(Page, cls).__new__(cls)
             obj._meta = yml['headers']
+            obj._meta['filename'] = filename
             obj._filepos = yml['filepos']
-            for item in key_mapper.requires:
+            for item in requires:
                 if item not in obj._meta:
                     raise PageException('Required header is not present in file "{0}": "{1}"'.format(filename, item))
             return obj
@@ -56,18 +56,32 @@ class Page(object):
             raise PageException('No headers found in file: {0}'.format(filename))
     
     
-    def __init__(self, filename, encoding, key_mapper):
-        self.filename = filename
+    def __init__(self, filename, encoding, keymap_strategy, requires):
         self.encoding = encoding
-        self.key_mapper=key_mapper
+        self.keymap_strategy = keymap_strategy
         self.mtime = os.path.getmtime(filename)
     
     def __repr__(self):
-        return '<Page "{0}">'.format(self.filename)
+        return '<Page "{0}">'.format(self.meta['filename'])
     
     @property
     def key(self):
-        return self.key_mapper.get_key(self)
+        """
+        Call a function or uses a string formatting to return the object key.
+        Examples:
+        '{category}/{slug}'
+        def dateslug(meta):
+            parse_time='%Y-%m-%d %H:%M %z'
+            format_time='%Y/%m'
+            if isinstance(meta['date'], datetime.date):
+                dt = meta['date']
+            else:
+                from datetime import datetime
+                dt = datetime.datetime.strptime(meta['date'], parse_ptime)
+            return '{0}/{1}'.format(dt.strftime(format_time), meta['slug'])
+        """
+        kst = self.keymap_strategy
+        return kst(self.meta) if callable(kst) else kst.format_map(self.meta)
     
     @property
     def meta(self):
@@ -78,9 +92,9 @@ class Page(object):
         try:
             return self._content
         except AttributeError:
-            if self.mtime != os.path.getmtime(self.filename):
-                raise PageException('File changed since instance creation: {0}'.format(self.filename))
-            with open(self.filename, encoding=self.encoding) as raw:
+            if self.mtime != os.path.getmtime(self.meta['filename']):
+                raise PageException('File changed since instance creation: {0}'.format(self.meta['filename']))
+            with open(self.meta['filename'], encoding=self.encoding) as raw:
                 raw.seek(self._filepos, 0)
                 self._content = raw.read().strip()
             return self._content
