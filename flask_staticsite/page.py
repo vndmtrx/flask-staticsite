@@ -6,6 +6,7 @@ import os
 import six
 import yaml
 import logging
+from io import open
 from .utils.exceptions import PageException
 from .utils.key_mappers import SlugMapper
 
@@ -13,12 +14,12 @@ logger = logging.getLogger(__name__)
 
 def _preload_header(file, encoding, shield='---'):
     header = {}
-    with open(file, encoding=encoding) if six.PY3 else open(file) as raw:
+    with open(file, encoding=encoding) as raw:
         s = ''
-        r = raw.readline().strip() if six.PY3 else raw.readline().decode(encoding).strip()
+        r = raw.readline().strip()
         if r == shield:
             while True:
-                line = raw.readline() if six.PY3 else raw.readline().decode(encoding)
+                line = raw.readline()
                 if not line:
                     break
                 elif line.strip() != shield:
@@ -79,7 +80,7 @@ class Page(object):
         except AttributeError:
             if self.mtime != os.path.getmtime(self.filename):
                 raise PageException('File changed since instance creation: {0}'.format(self.filename))
-            with open(self.filename, encoding=self.encoding) if compatibility.IS_PY3 else open(self.filename) as raw:
+            with open(self.filename, encoding=self.encoding) as raw:
                 raw.seek(self._filepos, 0)
-                self._content = raw.read().strip() if compatibility.IS_PY3 else raw.read().decode(encoding).strip()
+                self._content = raw.read().strip()
             return self._content
