@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import os
+import six
 import yaml
 import logging
-from . import compatibility
 from .utils.exceptions import PageException
 from .utils.key_mappers import SlugMapper
 
@@ -12,12 +13,12 @@ logger = logging.getLogger(__name__)
 
 def _preload_header(file, encoding, shield='---'):
     header = {}
-    with open(file, encoding=encoding) if compatibility.IS_PY3 else open(file) as raw:
+    with open(file, encoding=encoding) if six.PY3 else open(file) as raw:
         s = ''
-        r = raw.readline().strip() if compatibility.IS_PY3 else raw.readline().decode(encoding).strip()
+        r = raw.readline().strip() if six.PY3 else raw.readline().decode(encoding).strip()
         if r == shield:
             while True:
-                line = raw.readline() if compatibility.IS_PY3 else raw.readline().decode(encoding)
+                line = raw.readline() if six.PY3 else raw.readline().decode(encoding)
                 if not line:
                     break
                 elif line.strip() != shield:

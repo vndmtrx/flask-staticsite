@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import os
+import six
 import logging
-from . import compatibility
 from .page import Page
 from .utils.exceptions import SitemapException
+from .utils.key_mappers import SlugMapper
 
 logger = logging.getLogger(__name__)
 
@@ -23,11 +25,11 @@ class Sitemap(object):
     headers, create lists of posts for any of them.
     """
     
-    def __init__(self, path, extensions, encoding, key_mapper):
+    def __init__(self, path, extensions, encoding):
         self.path = path
         self.extensions = extensions
         self.encoding = encoding
-        self._key_mapper = key_mapper
+        self._key_mapper = SlugMapper()
     
     @property
     def key_mapper(self):
@@ -68,16 +70,14 @@ class Sitemap(object):
     
     def pages_by_header(self, header, item=None):
         l = {kw: p for kw, p in self.pages.items() if header in p.meta}
-        if item == None:
-            return l
-        else:
-            for kw, p in l.items():
+        for kw, p in l.items():
+            if item != None:
                 if isinstance(p.meta[header], (list, dict, tuple, set)):
                     if item not in p.meta[header]:
                         continue
                 elif item != p.meta[header]:
                     continue
-                yield kw, p
+            yield kw, p
     
     def header_values(self, header):
         l = {kw: p for kw, p in self.pages.items() if header in p.meta}
@@ -105,4 +105,4 @@ class Sitemap(object):
             pass
     
     def __iter__(self):
-        return compatibility.itervalues(self.pages)
+        return six.itervalues(self.pages)

@@ -27,21 +27,26 @@ setup(
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'Flask>=0.8',
-        'PyYAML>=3.10'
+        'Flask>=1.0.2',
+        'PyYAML>=3.13',
+        'six>=1.11.0',
     ],
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache License',
+        'License :: OSI Approved :: Apache Software License',
+        'Natural Language :: Portuguese (Brazilian)',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-        'Topic :: Software Development :: Libraries :: Python Modules',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: Implementation :: PyPy',
+        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+        'Topic :: Internet :: WWW/HTTP :: Site Management',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Text Processing :: Indexing',
+        'Topic :: Utilities',
+        'Framework :: Flask',
     ]
 )
