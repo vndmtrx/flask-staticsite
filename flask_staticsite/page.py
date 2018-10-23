@@ -12,24 +12,25 @@ from .utils.exceptions import PageException
 logger = logging.getLogger(__name__)
 
 def _preload_header(file, encoding, shield='---'):
-    header = {}
+    header = None
+    filepos = None
+    s = ''
     with open(file, encoding=encoding) as raw:
-        s = ''
         r = raw.readline().strip()
         if r == shield:
             while True:
                 line = raw.readline()
                 if not line:
                     break
-                elif line.strip() != shield:
-                    s += line
-                else:
-                    header['filepos'] = raw.tell()
+                elif line.strip() == shield:
+                    filepos = raw.tell()
                     break
-        if 'filepos' not in header:
+                else:
+                    s += line
+        if filepos == None:
             raise PageException('Malformed header in file: {0}'.format(file))
-        header['headers'] = yaml.safe_load(s)
-    return header
+        header = yaml.safe_load(s)
+    return filepos, header
 
 class Page(object):
     """Simple class to store all information regarding a static page.
@@ -39,52 +40,49 @@ class Page(object):
     deliver them.
     """
     
-    def __new__(cls, filename, encoding='utf-8', keymap_strategy='{filename}', requires=[]):
-        yml = _preload_header(filename, encoding)
-        #if 'headers' in yml and 'filepos' in yml:
-        #if all(x in yml for x in ('headers','filepos')):
-        if {'headers', 'filepos'}.issubset(yml):
+    def __new__(cls, filename, encoding='utf-8', keymap_strategy='{filename}'):
+        filepos, yml = _preload_header(filename, encoding)
+        if filepos and yml:
             obj = super(Page, cls).__new__(cls)
-            obj._meta = yml['headers']
+            obj._meta = yml
             obj._meta['filename'] = filename
-            obj._filepos = yml['filepos']
-            for item in requires:
-                if item not in obj._meta:
-                    raise PageException('Required header is not present in file "{0}": "{1}"'.format(filename, item))
+            obj._filepos = filepos
             return obj
         else:
             raise PageException('No headers found in file: {0}'.format(filename))
     
     
-    def __init__(self, filename, encoding, keymap_strategy, requires):
+    def __init__(self, filename, encoding='utf-8', keymap_strategy='{filename}'):
         self.encoding = encoding
         self.keymap_strategy = keymap_strategy
         self.mtime = os.path.getmtime(filename)
     
     def __repr__(self):
-        return '<Page "{0}">'.format(self.meta['filename'])
+        return '<Page "{0}">'.format(self.key)
     
     @property
     def key(self):
         """
         Call a function or uses a string formatting to return the object key.
         Examples:
+        
         '{category}/{slug}'
+        
+        import datetime
         def dateslug(meta):
             parse_time='%Y-%m-%d %H:%M %z'
             format_time='%Y/%m'
             if isinstance(meta['date'], datetime.date):
                 dt = meta['date']
             else:
-                from datetime import datetime
-                dt = datetime.datetime.strptime(meta['date'], parse_ptime)
+                dt = datetime.datetime.strptime(meta['date'], parse_time)
             return '{0}/{1}'.format(dt.strftime(format_time), meta['slug'])
         """
         kst = self.keymap_strategy
-        return kst(self.meta) if callable(kst) else kst.format_map(self.meta)
+        return kst(self.headers) if callable(kst) else kst.format_map(self.headers)
     
     @property
-    def meta(self):
+    def headers(self):
         return self._meta
     
     @property
@@ -92,9 +90,9 @@ class Page(object):
         try:
             return self._content
         except AttributeError:
-            if self.mtime != os.path.getmtime(self.meta['filename']):
-                raise PageException('File changed since instance creation: {0}'.format(self.meta['filename']))
-            with open(self.meta['filename'], encoding=self.encoding) as raw:
+            if self.mtime != os.path.getmtime(self.headers['filename']):
+                raise PageException('File changed since instance creation: {0}'.format(self.headers['filename']))
+            with open(self.headers['filename'], encoding=self.encoding) as raw:
                 raw.seek(self._filepos, 0)
                 self._content = raw.read().strip()
             return self._content

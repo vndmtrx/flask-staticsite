@@ -24,11 +24,10 @@ class Sitemap(object):
     headers, create lists of posts for any of them.
     """
     
-    def __init__(self, path, extensions, encoding='utf-8', keymap_strategy='{filename}', requires=[]):
+    def __init__(self, path, extensions, encoding='utf-8', keymap_strategy='{filename}'):
         self.path = path
         self.extensions = extensions
         self.encoding = encoding
-        self._requires = requires
         self._keymap_strategy = keymap_strategy
     
     @property
@@ -47,7 +46,7 @@ class Sitemap(object):
                     yield full_name
         for filename in _walker():
             try:
-                pg = Page(filename, self.encoding, self._keymap_strategy, self._requires)
+                pg = Page(filename, self.encoding, self._keymap_strategy)
                 if pg.key not in pagedict:
                     pagedict[pg.key] = pg
                 else:
@@ -59,34 +58,34 @@ class Sitemap(object):
         self._pages = pagedict
         return self._pages
     
-    def pages_by_header(self, header, item=None):
-        l = {kw: p for kw, p in self.pages.items() if header in p.meta}
+    def filter_by_header(self, header, item=None):
+        l = {kw: p for kw, p in self.pages.items() if header in p.headers}
         for kw, p in l.items():
             if item != None:
-                if isinstance(p.meta[header], (list, dict, tuple, set)):
-                    if item not in p.meta[header]:
+                if isinstance(p.headers[header], (list, dict, tuple, set)):
+                    if item not in p.headers[header]:
                         continue
-                elif item != p.meta[header]:
+                elif item != p.headers[header]:
                     continue
             yield kw, p
     
     def header_values(self, header):
-        l = {kw: p for kw, p in self.pages.items() if header in p.meta}
+        l = {kw: p for kw, p in self.pages.items() if header in p.headers}
         s = set()
         for p in l.values():
-            if isinstance(p.meta[header], (list, dict, tuple, set)):
-                for item in p.meta[header]:
+            if isinstance(p.headers[header], (list, dict, tuple, set)):
+                for item in p.headers[header]:
                     if item in s:
                         continue
                     else:
                         s.add(item)
                         yield item
             else:
-                if p.meta[header] in s:
+                if p.headers[header] in s:
                     continue
                 else:
-                    s.add(p.meta[header])
-                    yield p.meta[header]
+                    s.add(p.headers[header])
+                    yield p.headers[header]
 
     
     def reload(self):
@@ -97,15 +96,6 @@ class Sitemap(object):
     
     def __iter__(self):
         return six.itervalues(self.pages)
-
-    @property
-    def requires(self):
-        return self._requires
-    
-    @requires.setter
-    def requires(self, value):
-        self._requires = value
-        self.reload()
     
     @property
     def keymap_strategy(self):
