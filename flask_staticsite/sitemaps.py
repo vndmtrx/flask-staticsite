@@ -25,7 +25,7 @@ class Sitemap(object):
     headers, create lists of posts for any of them.
     """
     
-    def __init__(self, path, extensions, encoding='utf-8', keymap_strategy='{filename}'):
+    def __init__(self, path, extensions=None, encoding='utf-8', keymap_strategy='{filename}'):
         self.path = path
         self.extensions = extensions
         self.encoding = encoding
