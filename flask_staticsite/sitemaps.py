@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import os
 import six
 import logging
-from .page import Page
+from .pages import Page
 from .utils.exceptions import SitemapException
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,6 @@ class Sitemap(object):
                 logger.debug(e, exc_info=True)
                 continue
         self._pages = pagedict
-        logger.info('Pagedict: {0}'.format(pagedict))
         return self._pages
     
     def filter_by_header(self, header, item=None):
