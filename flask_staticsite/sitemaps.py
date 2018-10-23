@@ -10,9 +10,10 @@ from .utils.exceptions import SitemapException
 
 logger = logging.getLogger(__name__)
 
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 hdl = logging.StreamHandler()
-fmt = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+#fmt = logging.Formatter('[%(asctime)s, %(name)s, %(funcName)s, %(lineno)s]: %(levelname)s - %(message)s')
+fmt = logging.Formatter('[%(filename)s:%(lineno)s %(funcName)10s()]: %(levelname)s %(message)s')
 hdl.setFormatter(fmt)
 logger.addHandler(hdl)
 
@@ -40,6 +41,7 @@ class Sitemap(object):
         def _walker():
             for cur_path, _, filenames in os.walk(self.path):
                 for n in filenames:
+                    logger.info('Filename: {0}'.format(n))
                     if self.extensions and not n.endswith(self.extensions):
                         continue
                     full_name = os.path.join(cur_path, n)
@@ -47,20 +49,22 @@ class Sitemap(object):
         for filename in _walker():
             try:
                 pg = Page(filename, self.encoding, self._keymap_strategy)
+                logger.info('Page: {0}'.format(pg))
                 if pg.key not in pagedict:
                     pagedict[pg.key] = pg
                 else:
                     raise SitemapException('Key "{0}" exists in the Sitemap.'.format(pg.key))
             except Exception as e:
-                logger.info('An exception occurred while processing the file: {0}. Ignoring file.'.format(filename, str(e)))
+                logger.warn('An exception occurred while processing the file: {0}. Ignoring file.'.format(filename, str(e)))
                 logger.debug(e, exc_info=True)
                 continue
         self._pages = pagedict
+        logger.info('Pagedict: {0}'.format(pagedict))
         return self._pages
     
     def filter_by_header(self, header, item=None):
-        l = {kw: p for kw, p in self.pages.items() if header in p.headers}
-        for kw, p in l.items():
+        filtered_pages = ((kw, p) for kw, p in self.pages.items() if header in p.headers)
+        for kw, p in filtered_pages:
             if item != None:
                 if isinstance(p.headers[header], (list, dict, tuple, set)):
                     if item not in p.headers[header]:
@@ -70,9 +74,9 @@ class Sitemap(object):
             yield kw, p
     
     def header_values(self, header):
-        l = {kw: p for kw, p in self.pages.items() if header in p.headers}
+        filtered_pages = (p for p in self.pages.values() if header in p.headers)
         s = set()
-        for p in l.values():
+        for p in filtered_pages:
             if isinstance(p.headers[header], (list, dict, tuple, set)):
                 for item in p.headers[header]:
                     if item in s:
@@ -86,7 +90,6 @@ class Sitemap(object):
                 else:
                     s.add(p.headers[header])
                     yield p.headers[header]
-
     
     def reload(self):
         try:
