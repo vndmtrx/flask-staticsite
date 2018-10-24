@@ -2,7 +2,7 @@ import os
 import re
 import sys
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 DIRNAME = os.path.abspath(os.path.dirname(__file__))
 rel = lambda *parts: os.path.abspath(os.path.join(DIRNAME, *parts))
@@ -20,9 +20,7 @@ setup(
     author_email='vndmtrx@gmail.com',
     description='Provides static pages to a Flask application.',
     long_description=README,
-    packages=[
-        'flask_staticsite'
-    ],
+    packages=find_packages(exclude=["tests"]),
     zip_safe=False,
     include_package_data=True,
     platforms='any',
