@@ -85,6 +85,13 @@ class Page(object):
     def headers(self):
         return self._meta
     
+    def __getitem__(self, name):
+        """Shortcut for accessing metadata.
+        ``page['slug']`` or, in a template, ``{{ page.slug }}`` are
+        equivalent to ``page.headers['slug']``.
+        """
+        return self.headers[name]
+    
     @property
     def content(self):
         try:
