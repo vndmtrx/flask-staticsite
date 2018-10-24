@@ -19,6 +19,7 @@ class StaticSite(object):
     def __init__(self, app=None, name=None):
         self.name = name
         self.config_prefix = 'STATICSITE' if name is None else '_'.join(('STATICSITE', name.upper()))
+        self.app = app
         if app is not None:
             self.init_app(app)
     
@@ -33,7 +34,6 @@ class StaticSite(object):
         if 'staticsite' not in app.extensions:
             app.extensions['staticsite'] = {}
         app.extensions['staticsite'][self.name] = self
-        self.app = app
         
         pth = self.config('root')
         ext = self.config('extensions')
@@ -42,7 +42,7 @@ class StaticSite(object):
         self._sitemap = Sitemap(pth, ext, enc, keymap)
     
     def config(self, key):
-        return self.app.config['_'.join((self.config_prefix, key.upper()))]
+        return current_app.config['_'.join((self.config_prefix, key.upper()))]
     
     def _auto_reload(self):
         if self.config('auto_reload'):
