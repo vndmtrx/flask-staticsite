@@ -7,6 +7,7 @@ import six
 import yaml
 import logging
 from io import open
+from functools import total_ordering
 from .utils.exceptions import PageException
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,7 @@ def _preload_header(file, encoding, shield='---'):
         header = yaml.safe_load(s)
     return filepos, header
 
+@total_ordering
 class Page(object):
     """Simple class to store all information regarding a static page.
     
@@ -103,3 +105,9 @@ class Page(object):
                 raw.seek(self._filepos, 0)
                 self._content = raw.read().strip()
             return self._content
+
+    def __eq__(self, other):
+        return self._meta == other._meta if isinstance(other, Page) else NotImplemented
+    
+    def __lt__(self, other):
+        return self.mtime < other.mtime if isinstance(other, Page) else NotImplemented
