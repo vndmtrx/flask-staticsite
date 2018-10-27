@@ -1,0 +1,12 @@
+<html>
+    <head>
+        {% if page.title %}
+        <title>{{ page.title }} - Blog</title>
+        {% else %}
+        <title>Welcome to Blog!</title>
+        {% endif %}
+    </head>
+    <body>
+        {{ page.content }}
+    </body>
+</html>

@@ -1,0 +1,12 @@
+<html>
+    <head>
+        <title>Blog</title>
+    </head>
+    <body>
+      <ul>
+      {% for page in sitemap %}
+        <li><a href="{{ url_for('get_page', slug=page.slug) }}">{{ page.title }}</a></li>
+      {% endfor %}
+    </ul>
+    </body>
+</html>
