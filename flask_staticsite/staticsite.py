@@ -47,7 +47,7 @@ class StaticSite(object):
     
     def _auto_reload(self):
         if self.config('auto_reload'):
-            sitemap.reload()
+            self.sitemap.reload()
     
     def teardown(self, exception):
         pass
