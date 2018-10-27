@@ -20,7 +20,7 @@ setup(
     author_email='vndmtrx@gmail.com',
     description='Provides static pages to a Flask application.',
     long_description=README,
-    packages=find_packages(exclude=["tests"]),
+    packages=find_packages(exclude=["tests", "examples"]),
     zip_safe=False,
     include_package_data=True,
     platforms='any',
