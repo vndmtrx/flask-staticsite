@@ -10,13 +10,6 @@ from .utils.exceptions import SitemapException
 
 logger = logging.getLogger(__name__)
 
-logger.setLevel(logging.INFO)
-hdl = logging.StreamHandler()
-#fmt = logging.Formatter('[%(asctime)s, %(name)s, %(funcName)s, %(lineno)s]: %(levelname)s - %(message)s')
-fmt = logging.Formatter('[%(filename)s:%(lineno)s %(funcName)10s()]: %(levelname)s %(message)s')
-hdl.setFormatter(fmt)
-logger.addHandler(hdl)
-
 class Sitemap(object):
     """Class responsible to get all posts from file.
     
