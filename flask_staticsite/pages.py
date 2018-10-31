@@ -105,7 +105,12 @@ class Page(object):
                 raw.seek(self._filepos, 0)
                 self._content = raw.read().strip()
             return self._content
-
+    
+    @property
+    def raw(self):
+        with open(self.headers['filename'], encoding=self.encoding) as raw:
+            return raw.read()
+    
     def __eq__(self, other):
         return self._meta == other._meta if isinstance(other, Page) else NotImplemented
     

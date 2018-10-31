@@ -20,9 +20,15 @@ app.config.from_pyfile('page.cfg')
 site = StaticSite()
 
 @app.route('/')
-def hello():
-    user = {'username': 'Miguel'}
-    return render_template('index.html', sitemap=site.sitemap)
+def get_all_posts():
+    lspages = site.sitemap.pages.values()
+    lstags = site.sitemap.header_values('tags')
+    return render_template('index.html', pages=lspages, tags=lstags)
+
+@app.route('/tags/<tag>')
+def get_tags(tag):
+    dttags = dict(site.sitemap.filter_by_header('tags', tag))
+    return render_template('tags.html', tag=tag, tags=dttags.values())
 
 @app.route('/<slug>.html')
 def get_page(slug):
@@ -33,10 +39,20 @@ def get_page(slug):
         abort(404)
 
 @app.route('/<slug>.txt')
-def xpage(slug):
+def get_content_page(slug):
     if slug in site.sitemap.pages:
         page = site.sitemap.pages[slug]
         r = make_response(page.content)
+        r.headers['Content-Type'] = 'text/plain; charset=utf-8'
+        return r
+    else:
+        abort(404)
+
+@app.route('/<slug>.raw')
+def get_raw_page(slug):
+    if slug in site.sitemap.pages:
+        page = site.sitemap.pages[slug]
+        r = make_response(page.raw)
         r.headers['Content-Type'] = 'text/plain; charset=utf-8'
         return r
     else:

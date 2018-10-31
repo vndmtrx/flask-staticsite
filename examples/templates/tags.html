@@ -1,23 +1,16 @@
 <html>
     <head>
-        <title>Example Blog</title>
+        <title>Tag {{ tag }}</title>
     </head>
     <body>
-      <h1>All Posts</h1>
       <ul>
-      {%- for page in pages -%}
+      {%- for page in tags -%}
       {%- if page.title -%}
         <li><a href="{{ url_for('get_page', slug=page.slug) }}">{{ page.title }}</a></li>
       {%- else -%}
         <li><a href="{{ url_for('get_page', slug=page.slug) }}">No title</a></li>
       {%-endif -%}
       {%- endfor -%}
-    </ul>
-    <h1>All Tags</h1>
-    <ul>
-    {%- for tag in tags -%}
-      <li><a href="{{ url_for('get_tags', tag=tag) }}">{{ tag }}</a></li>
-    {%- endfor -%}
     </ul>
     </body>
 </html>
