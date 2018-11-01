@@ -8,16 +8,27 @@ from flask import Flask, render_template, make_response, abort
 from flask_staticsite import StaticSite
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 hdl = logging.StreamHandler()
 #fmt = logging.Formatter('[%(asctime)s, %(name)s, %(funcName)s, %(lineno)s]: %(levelname)s - %(message)s')
 fmt = logging.Formatter('[%(filename)s:%(lineno)s %(funcName)10s()]: %(levelname)s %(message)s')
 hdl.setFormatter(fmt)
 logger.addHandler(hdl)
 
+import datetime
+def dateslug(meta):
+    parse_time='%Y-%m-%d %H:%M %z'
+    format_time='%Y/%m'
+    if isinstance(meta['date'], datetime.date):
+        dt = meta['date']
+    else:
+        dt = datetime.datetime.strptime(meta['date'], parse_time)
+    return '{0}/{1}'.format(dt.strftime(format_time), meta['slug'])
+
 app = Flask(__name__)
 app.config.from_pyfile('page.cfg')
 site = StaticSite()
+site.keymap_strategy = dateslug
 
 @app.route('/')
 def get_all_posts():
@@ -30,7 +41,7 @@ def get_tags(tag):
     lstags = site.sitemap.filter_by_header('tags', tag)
     return render_template('tags.html', tag=tag, tags=lstags)
 
-@app.route('/<slug>.html')
+@app.route('/<path:slug>.html')
 def get_page(slug):
     if slug in site.sitemap.pages:
         page = site.sitemap.pages[slug]
@@ -38,7 +49,7 @@ def get_page(slug):
     else:
         abort(404)
 
-@app.route('/<slug>.txt')
+@app.route('/<path:slug>.txt')
 def get_content_page(slug):
     if slug in site.sitemap.pages:
         page = site.sitemap.pages[slug]
@@ -48,7 +59,7 @@ def get_content_page(slug):
     else:
         abort(404)
 
-@app.route('/<slug>.raw')
+@app.route('/<path:slug>.raw')
 def get_raw_page(slug):
     if slug in site.sitemap.pages:
         page = site.sitemap.pages[slug]
