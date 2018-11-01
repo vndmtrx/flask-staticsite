@@ -29,6 +29,7 @@ class Sitemap(object):
             return self._pages
         except AttributeError:
             pass
+        logger.info('Pages dict not found. Creating...')
         pagedict = {}
         def _walker():
             for cur_path, _, filenames in os.walk(self.path):
@@ -51,6 +52,7 @@ class Sitemap(object):
                 logger.info(e, exc_info=True)
                 continue
         self._pages = pagedict
+        logger.info('Pages dict created.')
         return self._pages
     
     @property
