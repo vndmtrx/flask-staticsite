@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import os
 from .sitemaps import Sitemap
-from flask import current_app, _app_ctx_stack, abort
+from flask import abort
 
 class StaticSite(object):
     

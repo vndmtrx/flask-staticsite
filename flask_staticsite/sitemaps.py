@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 import os
-import six
 import logging
 from .pages import Page
 from .utils.exceptions import SitemapException
@@ -54,19 +53,23 @@ class Sitemap(object):
         self._pages = pagedict
         return self._pages
     
+    @property
+    def pagelist(self):
+        return self.pages.values()
+    
     def filter_by_header(self, header, item=None):
-        filtered_pages = ((kw, p) for kw, p in self.pages.items() if header in p.headers)
-        for kw, p in filtered_pages:
+        filtered_pages = (p for p in self.pagelist if header in p.headers)
+        for p in filtered_pages:
             if item != None:
                 if isinstance(p.headers[header], (list, dict, tuple, set)):
                     if item not in p.headers[header]:
                         continue
                 elif item != p.headers[header]:
                     continue
-            yield kw, p
+            yield p
     
     def header_values(self, header):
-        filtered_pages = (p for p in self.pages.values() if header in p.headers)
+        filtered_pages = (p for p in self.pagelist if header in p.headers)
         s = set()
         for p in filtered_pages:
             if isinstance(p.headers[header], (list, dict, tuple, set)):
@@ -90,7 +93,7 @@ class Sitemap(object):
             pass
     
     def __iter__(self):
-        return six.itervalues(self.pages)
+        return iter(self.pages)
     
     @property
     def keymap_strategy(self):
