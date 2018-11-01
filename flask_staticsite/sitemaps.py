@@ -33,22 +33,22 @@ class Sitemap(object):
         def _walker():
             for cur_path, _, filenames in os.walk(self.path):
                 for n in filenames:
-                    logger.info('Filename: {0}'.format(n))
                     if self.extensions and not n.endswith(self.extensions):
                         continue
                     full_name = os.path.join(cur_path, n)
+                    logger.debug('Found page: {0}'.format(full_name))
                     yield full_name
         for filename in _walker():
             try:
                 pg = Page(filename, self.encoding, self._keymap_strategy)
-                logger.info('Page: {0}'.format(pg))
                 if pg.key not in pagedict:
                     pagedict[pg.key] = pg
                 else:
                     raise SitemapException('Key "{0}" exists in the Sitemap.'.format(pg.key))
+                logger.debug('Page created: {0}'.format(pg))
             except Exception as e:
                 logger.warn('An exception occurred while processing the file: {0}. Ignoring file.'.format(filename, str(e)))
-                logger.debug(e, exc_info=True)
+                logger.info(e, exc_info=True)
                 continue
         self._pages = pagedict
         return self._pages
@@ -85,12 +85,6 @@ class Sitemap(object):
                 else:
                     s.add(p.headers[header])
                     yield p.headers[header]
-    
-    def reload(self):
-        try:
-            del self._pages
-        except NameError:
-            pass
     
     def __iter__(self):
         return iter(self.pages)
