@@ -6,9 +6,9 @@
       <ul>
       {%- for page in tags -%}
       {%- if page.title -%}
-        <li><a href="{{ url_for('get_page', slug=page.slug) }}">{{ page.title }}</a></li>
+        <li><a href="{{ url_for('get_page', slug=page.key) }}">{{ page.title }}</a></li>
       {%- else -%}
-        <li><a href="{{ url_for('get_page', slug=page.slug) }}">No title</a></li>
+        <li><a href="{{ url_for('get_page', slug=page.key) }}">No title</a></li>
       {%-endif -%}
       {%- endfor -%}
     </ul>
