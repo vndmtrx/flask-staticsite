@@ -3,8 +3,11 @@
 from __future__ import unicode_literals
 
 import os
+import logging
 from .sitemaps import Sitemap
 from flask import abort
+
+logger = logging.getLogger(__name__)
 
 class StaticSite(object):
     
@@ -35,23 +38,79 @@ class StaticSite(object):
         app.extensions['staticsite'][self.name] = self
         
         self.app = app
-        
-        pth = self.config('root')
-        ext = self.config('extensions')
-        enc = self.config('encoding')
-        keymap = self.config('keymap_strategy')
-        self._sitemap = Sitemap(pth, ext, enc, keymap)
     
     def config(self, key):
         return self.app.config['_'.join((self.config_prefix, key.upper()))]
     
+    def reload(self):
+        try:
+            del self._sitemap
+        except (NameError, AttributeError):
+            pass
+    
     def _auto_reload(self):
         if self.config('auto_reload'):
-            self.sitemap.reload()
+            logger.info('Autoreloading...')
+            self.reload()
     
     def teardown(self, exception):
         pass
 
     @property
     def sitemap(self):
+        if not hasattr(self, '_sitemap'):
+            logger.info('Sitemap not found. Creating...')
+            pth = self.path
+            ext = self.extensions
+            enc = self.encoding
+            keymap = self.keymap_strategy
+            self._sitemap = Sitemap(pth, ext, enc, keymap)
         return self._sitemap
+    
+    @property
+    def path(self):
+        try:
+            return self._path
+        except (NameError, AttributeError):
+            return self.config('root')
+    
+    @path.setter
+    def path(self, value):
+        self._path = value
+        self.reload()
+
+    @property
+    def extensions(self):
+        try:
+            return self._extensions
+        except (NameError, AttributeError):
+            return self.config('extensions')
+    
+    @extensions.setter
+    def extensions(self, value):
+        self._extensions = value
+        self.reload()
+
+    @property
+    def encoding(self):
+        try:
+            return self._encoding
+        except (NameError, AttributeError):
+            return self.config('encoding')
+    
+    @encoding.setter
+    def encoding(self, value):
+        self._encoding = value
+        self.reload()
+
+    @property
+    def keymap_strategy(self):
+        try:
+            return self._keymap_strategy
+        except (NameError, AttributeError):
+            return self.config('keymap_strategy')
+    
+    @keymap_strategy.setter
+    def keymap_strategy(self, value):
+        self._keymap_strategy = value
+        self.reload()
