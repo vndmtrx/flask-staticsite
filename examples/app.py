@@ -7,8 +7,8 @@ import logging
 from flask import Flask, render_template, make_response, abort
 from flask_staticsite import StaticSite
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 hdl = logging.StreamHandler()
 #fmt = logging.Formatter('[%(asctime)s, %(name)s, %(funcName)s, %(lineno)s]: %(levelname)s - %(message)s')
 fmt = logging.Formatter('[%(filename)s:%(lineno)s %(funcName)10s()]: %(levelname)s %(message)s')
@@ -21,14 +21,14 @@ site = StaticSite()
 
 @app.route('/')
 def get_all_posts():
-    lspages = site.sitemap.pages.values()
+    lspages = site.sitemap.pagelist
     lstags = site.sitemap.header_values('tags')
     return render_template('index.html', pages=lspages, tags=lstags)
 
 @app.route('/tags/<tag>')
 def get_tags(tag):
-    dttags = dict(site.sitemap.filter_by_header('tags', tag))
-    return render_template('tags.html', tag=tag, tags=dttags.values())
+    lstags = site.sitemap.filter_by_header('tags', tag)
+    return render_template('tags.html', tag=tag, tags=lstags)
 
 @app.route('/<slug>.html')
 def get_page(slug):
