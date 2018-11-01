@@ -39,7 +39,10 @@ def get_all_posts():
 @app.route('/tags/<tag>')
 def get_tags(tag):
     lstags = site.sitemap.filter_by_header('tags', tag)
-    return render_template('tags.html', tag=tag, tags=lstags)
+    if tag in lstags:
+        return render_template('tags.html', tag=tag, tags=lstags)
+    else:
+        abort(404)
 
 @app.route('/<path:slug>.html')
 def get_page(slug):
