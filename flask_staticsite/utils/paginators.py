@@ -14,10 +14,13 @@ class DefaultPaginator(object):
         return [self._list[i:i + self._offset] for i in range(0, len(self._list), self._offset)]
     
     def __getitem__(self, idx):
-        return {'index': idx, 'item': self._paginated_list()[idx]}
+        return self._paginated_list()[idx]
     
     def __len__(self):
         return len(self._paginated_list())
     
     def __iter__(self):
         return iter(self._paginated_list())
+    
+    def __repr__(self):
+        return '<DefaultPaginator [{0}]>'.format(', '.join(map(str, self._paginated_list())))
