@@ -6,6 +6,7 @@ import os
 import logging
 from .pages import Page
 from .utils.exceptions import SitemapException
+from .utils.filters import PageFilter
 
 logger = logging.getLogger(__name__)
 
@@ -57,18 +58,7 @@ class Sitemap(object):
     
     @property
     def pagelist(self):
-        return self.pages.values()
-    
-    def filter_by_header(self, header, item=None):
-        filtered_pages = (p for p in self.pagelist if header in p.headers)
-        for p in filtered_pages:
-            if item != None:
-                if isinstance(p.headers[header], (list, dict, tuple, set)):
-                    if item not in p.headers[header]:
-                        continue
-                elif item != p.headers[header]:
-                    continue
-            yield p
+        return PageFilter(self.pages.values())
     
     def header_values(self, header):
         filtered_pages = (p for p in self.pagelist if header in p.headers)
