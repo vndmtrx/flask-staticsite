@@ -38,8 +38,8 @@ def get_all_posts():
 
 @app.route('/tags/<tag>')
 def get_tags(tag):
-    lstags = site.sitemap.filter_by_header('tags', tag)
-    if tag in lstags:
+    lstags = site.sitemap.pagelist.filter('tags', tag)
+    if len(lstags) > 0:
         return render_template('tags.html', tag=tag, tags=lstags)
     else:
         abort(404)
