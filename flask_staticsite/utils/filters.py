@@ -16,5 +16,9 @@ class PageFilter(list):
                 yield p
         return PageFilter(list(_apply()))
     
+    def sort(self, header, reverse=False):
+        filtered_pages = (p for p in self if header in p.headers)
+        return PageFilter(sorted(self, key=lambda k: k.headers[header], reverse=reverse))
+    
     def __repr__(self):
         return '<PageFilter [{0}]>'.format(', '.join(map(str, self)))
