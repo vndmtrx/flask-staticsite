@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import collections
-
 class PageFilter(list):
     def filter(self, header, item=None):
         def _apply():
