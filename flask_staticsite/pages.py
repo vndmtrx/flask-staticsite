@@ -41,25 +41,26 @@ class Page(object):
     deliver them.
     """
     
-    def __new__(cls, filename, encoding='utf-8', keymap_strategy='{filename}'):
-        filepos, yml = _preload_header(filename, encoding)
-        if filepos and yml:
-            obj = super(Page, cls).__new__(cls)
-            obj._meta = yml
-            obj._meta['filename'] = filename
-            obj._filepos = filepos
-            return obj
-        else:
-            raise PageException('No headers found in file: {0}'.format(filename))
-    
-    
     def __init__(self, filename, encoding='utf-8', keymap_strategy='{filename}'):
         self.encoding = encoding
         self.keymap_strategy = keymap_strategy
         self.mtime = os.path.getmtime(filename)
     
+    def load():
+        filepos, yml = _preload_header(filename, encoding)
+        if filepos and yml:
+            self._meta = yml
+            self._meta['filename'] = filename
+            self._filepos = filepos
+        else:
+            raise PageException('No headers found in file: {0}'.format(filename))
+    
     def __repr__(self):
         return '<Page "{0}">'.format(self.key)
+    
+    @property
+    def changed():
+        return self.mtime != os.path.getmtime(self.headers['filename'])
     
     @property
     def key(self):
@@ -95,15 +96,11 @@ class Page(object):
     
     @property
     def content(self):
-        try:
-            return self._content
-        except AttributeError:
-            if self.mtime != os.path.getmtime(self.headers['filename']):
-                raise PageException('File changed since instance creation: {0}'.format(self.headers['filename']))
-            with open(self.headers['filename'], encoding=self.encoding) as raw:
-                raw.seek(self._filepos, 0)
-                self._content = raw.read().strip()
-            return self._content
+        if self.changed:
+            raise PageException('File changed since instance creation: {0}'.format(self.headers['filename']))
+        with open(self.headers['filename'], encoding=self.encoding) as raw:
+            raw.seek(self._filepos, 0)
+        return raw.read().strip()
     
     @property
     def raw(self):
