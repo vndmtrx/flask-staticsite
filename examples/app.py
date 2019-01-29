@@ -30,11 +30,21 @@ app.config.from_pyfile('page.cfg')
 site = StaticSite()
 site.keymap_strategy = dateslug
 
+posts_per_page = 3
+
 @app.route('/')
 def get_all_posts():
-    lspages = site.sitemap.pagelist
+    lspages = site.sitemap.pagelist.sort('date')
     lstags = site.sitemap.header_values('tags')
     return render_template('index.html', pages=lspages, tags=lstags)
+
+@app.route('/page/<int:pag>')
+def get_paginated_posts(pag):
+    lspages = site.sitemap.pagelist.sort('date').paginate(posts_per_page)
+    pp = lspages[pag-1]
+    first = pp == lspages[0]
+    last = pp == lspages[-1]
+    return render_template('paginate.html', ppages=pp, pag=pag, l=len(lspages), first=first, last=last)
 
 @app.route('/tags/<tag>')
 def get_tags(tag):

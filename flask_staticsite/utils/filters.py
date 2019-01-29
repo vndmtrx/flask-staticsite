@@ -18,5 +18,8 @@ class PageFilter(list):
         filtered_pages = (p for p in self if header in p.headers)
         return PageFilter(sorted(self, key=lambda k: k.headers[header], reverse=reverse))
     
+    def paginate(self, offset):
+        return PageFilter([self[i:i + offset] for i in range(0, len(self), offset)])
+    
     def __repr__(self):
         return '<PageFilter [{0}]>'.format(', '.join(map(str, self)))

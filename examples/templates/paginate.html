@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <title>Page {{ pag }} of {{ l }}</title>
+    </head>
+    <body>
+      <h1>Page {{ pag }} of {{ l }}</h1>
+      <ul>
+      {%- for page in ppages -%}
+      {%- if page.title -%}
+        <li><a href="{{ url_for('get_page', slug=page.key) }}">{{ page.title }}</a></li>
+      {%- else -%}
+        <li><a href="{{ url_for('get_page', slug=page.key) }}">No title</a></li>
+      {%-endif -%}
+      {%- endfor -%}
+    </ul>
+    {%- if not first -%}
+    <a href="{{ url_for('get_paginated_posts', pag=1) }}">First</a>
+    <a href="{{ url_for('get_paginated_posts', pag=pag-1) }}">Previous</a>
+    {%- else -%}
+    First
+    Previous
+    {%-endif -%}
+    {%- if not last -%}
+    <a href="{{ url_for('get_paginated_posts', pag=pag+1) }}">Next</a>
+    <a href="{{ url_for('get_paginated_posts', pag=l) }}">Last</a>
+    {%- else -%}
+    Next
+    Last
+    {%-endif -%}
+    </body>
+</html>
