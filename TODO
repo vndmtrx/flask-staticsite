@@ -10,10 +10,14 @@ OK - Arquivos que derem qualquer erro de carregamento são ignorados
 REMOVIDO -- Entrada 'slug' é a chave primária das páginas, e por ela as páginas são carregadas do disco
 REMOVIDO -- Entrada 'date' é importante para a organização das páginas (adicionar ao require do sitemap)
 
-Carregar listas de postagens de forma Pagina, permitindo a criação de páginas de índice com menos itens (preferencialmente usando itertools)
+OK Carregar listas de postagens de forma Pagina, permitindo a criação de páginas de índice com menos itens (preferencialmente usando itertools)
 - [lista[i:i+offset] for i in range(0, len(lista), offset)][index]
 
 FALTA Criar marcador de cabeçalho de página, de forma a poder extrair parte do conteúdo da postagem para exibição em páginas e índice
 
 REMOVIDO Para um objeto StaticSite, permitir a criação de várias instâncias de Sitemap, com configurações diferentes.
 OK O objeto StaticSite será responsável por fazer interligação com o Flask, ao ponto que o objeto Sitemap será responsável únicamente por fazer a indexação dos arquivos do disco através da classe Page.
+
+TODO Criar formar de fazer cache da lista de posts para: (1) compilar somente o que foi alterado; (2) minimizar consumo de memória em sites com grande quantidade de posts.
+
+TODO Separar a mecânica de criação da classe Page dos requerimentos necessários para que a mesma funcione. O formato atual pode ser até mais simples, mas não permite fazer o cache da classe usando a biblioteca pickle.
