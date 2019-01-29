@@ -38,6 +38,7 @@ def get_all_posts():
     lstags = site.sitemap.header_values('tags')
     return render_template('index.html', pages=lspages, tags=lstags)
 
+@app.route('/page/', defaults={'pag': 1})
 @app.route('/page/<int:pag>')
 def get_paginated_posts(pag):
     lspages = site.sitemap.pagelist.sort('date').paginate(posts_per_page)
