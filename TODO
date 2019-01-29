@@ -13,6 +13,8 @@ REMOVIDO -- Entrada 'date' é importante para a organização das páginas (adic
 OK Carregar listas de postagens de forma Pagina, permitindo a criação de páginas de índice com menos itens (preferencialmente usando itertools)
 - [lista[i:i+offset] for i in range(0, len(lista), offset)][index]
 
+TODO Seguir paginação no formato http://flask.pocoo.org/snippets/44/
+
 FALTA Criar marcador de cabeçalho de página, de forma a poder extrair parte do conteúdo da postagem para exibição em páginas e índice
 
 REMOVIDO Para um objeto StaticSite, permitir a criação de várias instâncias de Sitemap, com configurações diferentes.
