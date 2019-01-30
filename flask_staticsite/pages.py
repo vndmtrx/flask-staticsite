@@ -43,23 +43,28 @@ class Page(object):
     
     def __init__(self, filename, encoding='utf-8', keymap_strategy='{filename}'):
         self.encoding = encoding
+        self.filename = filename
         self.keymap_strategy = keymap_strategy
         self.mtime = os.path.getmtime(filename)
+        self._load()
     
-    def load():
-        filepos, yml = _preload_header(filename, encoding)
+    def _load(self):
+        filepos, yml = _preload_header(self.filename, self.encoding)
         if filepos and yml:
             self._meta = yml
-            self._meta['filename'] = filename
+            self._meta['filename'] = self.filename
             self._filepos = filepos
         else:
             raise PageException('No headers found in file: {0}'.format(filename))
+    
+    def reload(self):
+        self._load()
     
     def __repr__(self):
         return '<Page "{0}">'.format(self.key)
     
     @property
-    def changed():
+    def changed(self):
         return self.mtime != os.path.getmtime(self.headers['filename'])
     
     @property
@@ -80,8 +85,12 @@ class Page(object):
                 dt = datetime.datetime.strptime(meta['date'], parse_time)
             return '{0}/{1}'.format(dt.strftime(format_time), meta['slug'])
         """
-        kst = self.keymap_strategy
-        return kst(self.headers) if callable(kst) else kst.format_map(self.headers)
+        try:
+            kst = self.keymap_strategy
+            return kst(self.headers) if callable(kst) else kst.format_map(self.headers)
+        except BaseException as e:
+            logger.error('An exception occurred while processing key function.')
+            raise e
     
     @property
     def headers(self):
@@ -100,7 +109,7 @@ class Page(object):
             raise PageException('File changed since instance creation: {0}'.format(self.headers['filename']))
         with open(self.headers['filename'], encoding=self.encoding) as raw:
             raw.seek(self._filepos, 0)
-        return raw.read().strip()
+            return raw.read().strip()
     
     @property
     def raw(self):
