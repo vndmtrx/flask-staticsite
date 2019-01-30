@@ -48,7 +48,7 @@ class Sitemap(object):
                 else:
                     raise SitemapException('Key "{0}" exists in the Sitemap.'.format(pg.key))
                 logger.debug('Page created: {0}'.format(pg))
-            except Exception as e:
+            except BaseException as e:
                 logger.warn('An exception occurred while processing the file: {0}. Ignoring file.'.format(filename, str(e)))
                 logger.info(e, exc_info=True)
                 continue
