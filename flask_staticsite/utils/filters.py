@@ -20,7 +20,7 @@ class PageFilter(list):
         return PageFilter(sorted(self, key=lambda k: k.headers[header], reverse=reverse))
     
     def paginate(self, offset):
-        return PageFilter([self[i:i + offset] for i in range(0, len(self), offset)])
+        return [PageFilter(self[i:i + offset]) for i in range(0, len(self), offset)]
     
     def __repr__(self):
         return '<PageFilter [{0}]>'.format(', '.join(map(str, self)))
