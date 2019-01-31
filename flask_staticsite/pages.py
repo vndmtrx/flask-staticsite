@@ -11,7 +11,15 @@ from .utils.exceptions import PageException
 
 logger = logging.getLogger(__name__)
 
-def _preload_header(file, encoding, shield='---'):
+def is_loaded(fn):
+    def fn_wrapper(*args, **kwargs):
+        if args[0].loaded:
+            return fn(*args, **kwargs)
+        else:
+            raise PageException('Page instance has no headers: {0}'.format(args[0].filename))
+    return fn_wrapper
+
+def _preload_yaml_header(file, encoding, shield='---'):
     header = None
     filepos = None
     s = ''
@@ -28,7 +36,7 @@ def _preload_header(file, encoding, shield='---'):
                 else:
                     s += line
         if filepos == None:
-            raise PageException('Malformed header in file: {0}'.format(file))
+            raise PageException('Malformed or inexistent yaml header in file: {0}'.format(file))
         header = yaml.safe_load(s)
     return filepos, header
 
@@ -49,25 +57,36 @@ class Page(object):
         self._load()
     
     def _load(self):
-        filepos, yml = _preload_header(self.filename, self.encoding)
+        if hasattr(self, '_meta'): del self._meta
+        filepos, yml = _preload_yaml_header(self.filename, self.encoding)
         if filepos and yml:
             self._meta = yml
             self._meta['filename'] = self.filename
             self._filepos = filepos
         else:
-            raise PageException('No headers found in file: {0}'.format(filename))
+            raise PageException('No headers found in file: {0}'.format(self.filename))
     
     def reload(self):
         self._load()
     
     def __repr__(self):
-        return '<Page "{0}">'.format(self.key)
+        try:
+            return '<Page "{0}">'.format(self.key)
+        except PageException as e:
+            logger.warn('Instance has no valid headers. Returning filename: {0}'.format(self.filename))
+            return '<Page "{0}">'.format(self.filename)
     
     @property
+    def loaded(self):
+        return hasattr(self, '_meta')
+        
+    @property
+    @is_loaded
     def changed(self):
         return self.mtime != os.path.getmtime(self.headers['filename'])
     
     @property
+    @is_loaded
     def key(self):
         """
         Call a function or uses a string formatting to return the object key.
@@ -88,14 +107,16 @@ class Page(object):
         try:
             kst = self.keymap_strategy
             return kst(self.headers) if callable(kst) else kst.format_map(self.headers)
-        except BaseException as e:
+        except PageException as e:
             logger.error('An exception occurred while processing key function.')
             raise e
     
     @property
+    @is_loaded
     def headers(self):
         return self._meta
     
+    @is_loaded
     def __getitem__(self, name):
         """Shortcut for accessing metadata.
         ``page['slug']`` or, in a template, ``{{ page.slug }}`` are
@@ -104,6 +125,7 @@ class Page(object):
         return self.headers[name]
     
     @property
+    @is_loaded
     def content(self):
         if self.changed:
             raise PageException('File changed since instance creation: {0}'.format(self.headers['filename']))
@@ -113,7 +135,7 @@ class Page(object):
     
     @property
     def raw(self):
-        with open(self.headers['filename'], encoding=self.encoding) as raw:
+        with open(self.filename, encoding=self.encoding) as raw:
             return raw.read()
     
     def __eq__(self, other):
