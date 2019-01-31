@@ -50,7 +50,7 @@ class Sitemap(object):
                 logger.debug('Page created: {0}'.format(pg))
             except BaseException as e:
                 logger.warn('An exception occurred while processing the file: {0}. Ignoring file.'.format(filename, str(e)))
-                logger.info(e, exc_info=True)
+                logger.debug('Exception Detailing:', exc_info=True)
                 continue
         self._pages = pagedict
         logger.info('Pages dict created.')
