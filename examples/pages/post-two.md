@@ -1,8 +1,4 @@
 ---
-slug: post-two
-date: 2018-10-10 11:09 -0300
-tags: [Post, Two, Even]
-category: Numbers
 ---
 
 # This is Post Two
