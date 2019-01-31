@@ -1,0 +1,19 @@
+{% macro render_pagination(pag, l) %}
+<div class=pagination>
+    {%- if pag != 1 -%}<a href="{{ url_for('get_paginated_posts', pag=1) }}">{%-endif-%}
+      First
+    {%- if pag != 1 -%}</a>{%-endif-%}
+    &nbsp;|&nbsp;
+    {%- if pag != 1 -%}<a href="{{ url_for('get_paginated_posts', pag=pag-1) }}">{%-endif-%}
+      Previous
+    {%- if pag != 1 -%}</a>{%-endif-%}
+    &nbsp;|&nbsp;
+    {%- if pag != l -%}<a href="{{ url_for('get_paginated_posts', pag=pag+1) }}">{%-endif-%}
+      Next
+    {%- if pag != l -%}</a>{%-endif-%}
+    &nbsp;|&nbsp;
+    {%- if pag != l -%}<a href="{{ url_for('get_paginated_posts', pag=l) }}">{%-endif-%}
+      Last
+    {%- if pag != l -%}</a>{%-endif-%}
+</div>
+{% endmacro %}

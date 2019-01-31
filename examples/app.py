@@ -43,9 +43,7 @@ def get_all_posts():
 def get_paginated_posts(pag):
     lspages = site.sitemap.pagelist.sort('date').paginate(posts_per_page)
     pp = lspages[pag-1]
-    first = pp == lspages[0]
-    last = pp == lspages[-1]
-    return render_template('paginate.html', ppages=pp, pag=pag, l=len(lspages), first=first, last=last)
+    return render_template('paginate.html', ppages=pp, pag=pag, l=len(lspages))
 
 @app.route('/tags/<tag>')
 def get_tags(tag):
