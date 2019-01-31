@@ -8,7 +8,7 @@ from flask import Flask, render_template, make_response, abort
 from flask_staticsite import StaticSite
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 hdl = logging.StreamHandler()
 #fmt = logging.Formatter('[%(asctime)s, %(name)s, %(funcName)s, %(lineno)s]: %(levelname)s - %(message)s')
 fmt = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s %(funcName)10s()]: %(levelname)s %(message)s')
